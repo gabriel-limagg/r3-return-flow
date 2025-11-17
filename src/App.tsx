@@ -8,6 +8,7 @@ import Login from "./pages/Login";
 import Pedidos from "./pages/Pedidos";
 import CadastroPedido from "./pages/CadastroPedido";
 import EditarPedido from "./pages/EditarPedido";
+import ImportarPedidos from "./pages/ImportarPedidos";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +44,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <EditarPedido />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/importar"
+              element={
+                <ProtectedRoute>
+                  <ImportarPedidos />
                 </ProtectedRoute>
               }
             />

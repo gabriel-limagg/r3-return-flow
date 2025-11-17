@@ -38,6 +38,16 @@ export function ComboboxSearchable({
   searchPlaceholder = "Buscar...",
 }: ComboboxSearchableProps) {
   const [open, setOpen] = React.useState(false);
+  const [searchValue, setSearchValue] = React.useState("");
+
+  const filteredOptions = React.useMemo(() => {
+    if (!searchValue) return options;
+    
+    const search = searchValue.toLowerCase();
+    return options.filter((option) => 
+      option.label.toLowerCase().includes(search)
+    );
+  }, [options, searchValue]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -55,17 +65,22 @@ export function ComboboxSearchable({
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0 bg-popover z-50">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+        <Command shouldFilter={false}>
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            value={searchValue}
+            onValueChange={setSearchValue}
+          />
           <CommandEmpty>{emptyText}</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
-            {options.map((option) => (
+            {filteredOptions.map((option) => (
               <CommandItem
                 key={option.value}
-                value={option.value}
-                onSelect={(currentValue) => {
-                  onChange(currentValue === value ? "" : currentValue);
+                value={option.label}
+                onSelect={() => {
+                  onChange(option.value);
                   setOpen(false);
+                  setSearchValue("");
                 }}
               >
                 <Check

@@ -65,37 +65,55 @@ export default function ImportarPedidos() {
         const lineNumber = index + 2; // +2 porque linha 1 é header
         const validation = validateRow(row, lineNumber);
 
-        // Matching de portador
+        // Matching de portador - extrair código se estiver no formato "004 - BRUNO RIBEIRO"
         let portador_id: string | undefined;
         if (row.portador) {
-          const portador = portadores?.find(
-            (p) =>
-              p.codigo?.toLowerCase() === row.portador.toLowerCase() ||
-              p.nome.toLowerCase().includes(row.portador.toLowerCase()) ||
-              row.portador.toLowerCase().includes(p.nome.toLowerCase())
-          );
+          // Tentar extrair código do formato "004 - NOME"
+          const portadorMatch = row.portador.match(/^(\d+)\s*-\s*(.+)$/);
+          const portadorCodigo = portadorMatch ? portadorMatch[1] : null;
+          const portadorNome = portadorMatch ? portadorMatch[2].trim() : row.portador;
+
+          const portador = portadores?.find((p) => {
+            // Primeiro tentar por código exato
+            if (portadorCodigo && p.codigo === portadorCodigo) return true;
+            // Depois tentar por nome
+            const pNome = p.nome.toLowerCase();
+            const searchNome = portadorNome.toLowerCase();
+            return pNome.includes(searchNome) || searchNome.includes(pNome);
+          });
           portador_id = portador?.id;
 
-          if (!portador_id && validation.isValid) {
-            validation.isValid = false;
+          if (!portador_id && row.portador.trim()) {
             validation.errors.push(`Portador "${row.portador}" não encontrado`);
+            if (!validation.warnings.includes('Portador não informado')) {
+              validation.isValid = false;
+            }
           }
         }
 
-        // Matching de cliente
+        // Matching de cliente - extrair código se estiver no formato "SP5814 - NATURA CABREUVA"
         let cliente_id: string | undefined;
         if (row.cliente) {
-          const cliente = clientes?.find(
-            (c) =>
-              c.codigo?.toLowerCase() === row.cliente.toLowerCase() ||
-              c.nome.toLowerCase().includes(row.cliente.toLowerCase()) ||
-              row.cliente.toLowerCase().includes(c.nome.toLowerCase())
-          );
+          // Tentar extrair código do formato "SP5814 - NOME"
+          const clienteMatch = row.cliente.match(/^([A-Z0-9]+)\s*-\s*(.+)$/);
+          const clienteCodigo = clienteMatch ? clienteMatch[1] : null;
+          const clienteNome = clienteMatch ? clienteMatch[2].trim() : row.cliente;
+
+          const cliente = clientes?.find((c) => {
+            // Primeiro tentar por código exato
+            if (clienteCodigo && c.codigo?.toUpperCase() === clienteCodigo.toUpperCase()) return true;
+            // Depois tentar por nome
+            const cNome = c.nome.toLowerCase();
+            const searchNome = clienteNome.toLowerCase();
+            return cNome.includes(searchNome) || searchNome.includes(cNome);
+          });
           cliente_id = cliente?.id;
 
-          if (!cliente_id && validation.isValid) {
-            validation.isValid = false;
+          if (!cliente_id && row.cliente.trim()) {
             validation.errors.push(`Cliente "${row.cliente}" não encontrado`);
+            if (!validation.warnings.includes('Cliente não informado')) {
+              validation.isValid = false;
+            }
           }
         }
 
@@ -132,18 +150,28 @@ export default function ImportarPedidos() {
     for (let i = 0; i < validRows.length; i += batchSize) {
       const batch = validRows.slice(i, i + batchSize);
 
-      const insertData = batch.map((row) => ({
-        pedido_codigo: row.pedido_codigo.trim(),
-        romaneio: row.romaneio.trim(),
-        portador_id: row.portador_id!,
-        cliente_id: row.cliente_id!,
-        colaborador: row.colaborador.trim(),
-        base: row.base.toUpperCase(),
-        status: row.status,
-        data_cadastro: row.data_cadastro
-          ? new Date(row.data_cadastro).toISOString()
-          : new Date().toISOString(),
-      }));
+      const insertData = batch.map((row) => {
+        // Converter data brasileira para ISO
+        let dataCadastro = new Date().toISOString();
+        if (row.data_cadastro?.trim()) {
+          const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2}):(\d{2})/);
+          if (brDateMatch) {
+            const [, day, month, year, hour, minute] = brDateMatch;
+            dataCadastro = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).toISOString();
+          }
+        }
+
+        return {
+          pedido_codigo: row.pedido_codigo.trim(),
+          romaneio: row.romaneio?.trim() || '',
+          portador_id: row.portador_id!,
+          cliente_id: row.cliente_id!,
+          colaborador: row.colaborador.trim(),
+          base: row.base.toUpperCase(),
+          status: row.status,
+          data_cadastro: dataCadastro,
+        };
+      });
 
       const { data, error } = await supabase
         .from('pedidos_devolucao')

@@ -27,14 +27,38 @@ export interface ParsedRow extends CSVRow {
 const VALID_BASES = ['SP', 'RJ', 'MG'];
 const VALID_STATUS = ['A Devolver', 'Em processo de devolução', 'Devolvido'];
 
+const headerMapping: Record<string, string> = {
+  'id': 'id',
+  'data_de_criação': 'data_cadastro',
+  'pedido': 'pedido_codigo',
+  'portador': 'portador',
+  'romaneio': 'romaneio',
+  'colaborador': 'colaborador',
+  'base': 'base',
+  'status': 'status',
+  'cliente': 'cliente',
+  'modificado': 'updated_at',
+};
+
 export const parseCSV = (file: File): Promise<Papa.ParseResult<CSVRow>> => {
   return new Promise((resolve, reject) => {
-    Papa.parse<CSVRow>(file, {
+    Papa.parse<any>(file, {
       header: true,
       skipEmptyLines: true,
-      complete: resolve,
+      complete: (results) => {
+        // Mapear headers para o formato esperado
+        const mappedData = results.data.map((row: any) => {
+          const mappedRow: any = {};
+          Object.keys(row).forEach((key) => {
+            const normalizedKey = key.trim().toLowerCase().replace(/\s+/g, '_');
+            const mappedKey = headerMapping[normalizedKey] || normalizedKey;
+            mappedRow[mappedKey] = row[key]?.trim() || '';
+          });
+          return mappedRow as CSVRow;
+        });
+        resolve({ ...results, data: mappedData });
+      },
       error: reject,
-      transformHeader: (header) => header.trim().toLowerCase().replace(/\s+/g, '_'),
     });
   });
 };
@@ -47,15 +71,22 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
   if (!row.pedido_codigo?.trim()) {
     errors.push('Código do pedido é obrigatório');
   }
+  
+  // Romaneio não é mais obrigatório (pode estar vazio no CSV)
   if (!row.romaneio?.trim()) {
-    errors.push('Romaneio é obrigatório');
+    warnings.push('Romaneio não informado');
   }
+  
+  // Portador não é mais obrigatório (pode estar vazio no CSV)
   if (!row.portador?.trim()) {
-    errors.push('Portador é obrigatório');
+    warnings.push('Portador não informado');
   }
+  
+  // Cliente não é mais obrigatório (pode estar vazio no CSV)
   if (!row.cliente?.trim()) {
-    errors.push('Cliente é obrigatório');
+    warnings.push('Cliente não informado');
   }
+  
   if (!row.colaborador?.trim()) {
     errors.push('Colaborador é obrigatório');
   }
@@ -74,11 +105,21 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
     errors.push(`Status inválido. Use: ${VALID_STATUS.join(', ')}`);
   }
 
-  // Validar data (se fornecida)
+  // Validar data (se fornecida) - aceitar formato brasileiro
   if (row.data_cadastro?.trim()) {
-    const date = new Date(row.data_cadastro);
-    if (isNaN(date.getTime())) {
-      errors.push('Data de cadastro em formato inválido');
+    // Tentar parsear formato brasileiro: dd/MM/yyyy HH:mm
+    const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2}:\d{2})?/);
+    if (brDateMatch) {
+      const [, day, month, year] = brDateMatch;
+      const date = new Date(`${year}-${month}-${day}`);
+      if (isNaN(date.getTime())) {
+        errors.push('Data de cadastro em formato inválido');
+      }
+    } else {
+      const date = new Date(row.data_cadastro);
+      if (isNaN(date.getTime())) {
+        errors.push('Data de cadastro em formato inválido');
+      }
     }
   }
 
@@ -91,36 +132,36 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
 
 export const generateCSVTemplate = (): string => {
   const headers = [
-    'pedido_codigo',
-    'romaneio',
-    'portador',
-    'cliente',
-    'colaborador',
-    'base',
-    'status',
-    'data_cadastro',
+    'Pedido',
+    'Romaneio',
+    'Portador',
+    'Cliente',
+    'Colaborador',
+    'Base',
+    'Status',
+    'Data_de_Criação',
   ];
 
   const examples = [
     [
-      'PED001',
-      'ROM001',
-      'PORT001',
-      'CLI001',
-      'João Silva',
+      '3634759652',
+      '185615',
+      '004 - BRUNO RIBEIRO - CARRO',
+      'SP5814 - NATURA CABREUVA',
+      'ARIELY',
       'SP',
-      'A Devolver',
-      '2024-01-15 10:00:00',
+      'Devolvido',
+      '01/10/2025 11:50',
     ],
     [
-      'PED002',
-      'ROM002',
-      'Portador SP01',
-      'NATURA CABREUVA',
-      'Maria Santos',
+      '3629416714',
+      '185618',
+      '1033 - RAFAEL GRECCO CANTALEJO',
+      'LOG MANAGER LTDA 1169',
+      'LARYSSA',
       'RJ',
       'Em processo de devolução',
-      '',
+      '02/10/2025 10:30',
     ],
   ];
 

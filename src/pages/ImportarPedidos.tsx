@@ -409,12 +409,12 @@ export default function ImportarPedidos() {
                         </ul>
                       </div>
                     ))}
-                  </ul>
                   {result.errors.length > 20 && (
                     <p className="text-xs text-muted-foreground text-center">
                       Mostrando primeiros 20 erros de {result.errors.length}
                     </p>
                   )}
+                  </div>
                 </div>
               )}
 

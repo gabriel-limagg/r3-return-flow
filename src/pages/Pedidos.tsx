@@ -20,6 +20,7 @@ interface Pedido {
   base: string;
   status: string;
   data_cadastro: string;
+  updated_at: string;
   portadores: { nome: string; codigo: string } | null;
   clientes: { nome: string } | null;
 }
@@ -31,7 +32,10 @@ export default function Pedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(true);
   
-  const [searchText, setSearchText] = useState("");
+  const [searchPedido, setSearchPedido] = useState("");
+  const [searchRomaneio, setSearchRomaneio] = useState("");
+  const [searchPortador, setSearchPortador] = useState("");
+  const [searchCliente, setSearchCliente] = useState("");
   const [filterBase, setFilterBase] = useState("Todas");
   const [filterStatus, setFilterStatus] = useState("Todos");
   const [dateInicio, setDateInicio] = useState("");
@@ -70,15 +74,11 @@ export default function Pedidos() {
   };
 
   const filteredPedidos = pedidos.filter((pedido) => {
-    // Filtro de texto
-    const searchLower = searchText.toLowerCase();
-    const matchesSearch =
-      !searchText ||
-      pedido.pedido_codigo.toLowerCase().includes(searchLower) ||
-      pedido.romaneio.toLowerCase().includes(searchLower) ||
-      pedido.portadores?.nome.toLowerCase().includes(searchLower) ||
-      pedido.clientes?.nome.toLowerCase().includes(searchLower) ||
-      pedido.colaborador.toLowerCase().includes(searchLower);
+    // Filtros de busca separados
+    const matchesPedido = !searchPedido || pedido.pedido_codigo.toLowerCase().includes(searchPedido.toLowerCase());
+    const matchesRomaneio = !searchRomaneio || pedido.romaneio.toLowerCase().includes(searchRomaneio.toLowerCase());
+    const matchesPortador = !searchPortador || pedido.portadores?.nome.toLowerCase().includes(searchPortador.toLowerCase()) || pedido.portadores?.codigo.toLowerCase().includes(searchPortador.toLowerCase());
+    const matchesCliente = !searchCliente || pedido.clientes?.nome.toLowerCase().includes(searchCliente.toLowerCase());
 
     // Filtro de base
     const matchesBase = filterBase === "Todas" || pedido.base === filterBase;
@@ -89,18 +89,18 @@ export default function Pedidos() {
     // Filtro de data
     let matchesDate = true;
     if (dateInicio) {
-      const pedidoDate = new Date(pedido.data_cadastro);
+      const cadastroDate = new Date(pedido.data_cadastro);
       const inicioDate = new Date(dateInicio);
-      matchesDate = pedidoDate >= inicioDate;
+      matchesDate = cadastroDate >= inicioDate;
     }
     if (dateFim && matchesDate) {
-      const pedidoDate = new Date(pedido.data_cadastro);
+      const editDate = new Date(pedido.updated_at);
       const fimDate = new Date(dateFim);
       fimDate.setHours(23, 59, 59, 999);
-      matchesDate = pedidoDate <= fimDate;
+      matchesDate = editDate <= fimDate;
     }
 
-    return matchesSearch && matchesBase && matchesStatus && matchesDate;
+    return matchesPedido && matchesRomaneio && matchesPortador && matchesCliente && matchesBase && matchesStatus && matchesDate;
   });
 
   return (
@@ -132,19 +132,49 @@ export default function Pedidos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               <div className="space-y-2">
-                <Label htmlFor="search">Busca Geral</Label>
-                <div className="relative">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="search"
-                    placeholder="Pedido, romaneio, portador..."
-                    value={searchText}
-                    onChange={(e) => setSearchText(e.target.value)}
-                    className="pl-10 h-11"
-                  />
-                </div>
+                <Label htmlFor="search-pedido">Pedido</Label>
+                <Input
+                  id="search-pedido"
+                  placeholder="Buscar pedido..."
+                  value={searchPedido}
+                  onChange={(e) => setSearchPedido(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="search-romaneio">Romaneio</Label>
+                <Input
+                  id="search-romaneio"
+                  placeholder="Buscar romaneio..."
+                  value={searchRomaneio}
+                  onChange={(e) => setSearchRomaneio(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="search-portador">Portador</Label>
+                <Input
+                  id="search-portador"
+                  placeholder="Buscar portador..."
+                  value={searchPortador}
+                  onChange={(e) => setSearchPortador(e.target.value)}
+                  className="h-11"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="search-cliente">Cliente</Label>
+                <Input
+                  id="search-cliente"
+                  placeholder="Buscar cliente..."
+                  value={searchCliente}
+                  onChange={(e) => setSearchCliente(e.target.value)}
+                  className="h-11"
+                />
               </div>
 
               <div className="space-y-2">
@@ -178,7 +208,7 @@ export default function Pedidos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="date-inicio">Data Inicial</Label>
+                <Label htmlFor="date-inicio">Data Cadastro (Inicial)</Label>
                 <Input
                   id="date-inicio"
                   type="date"
@@ -189,7 +219,7 @@ export default function Pedidos() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="date-fim">Data Final</Label>
+                <Label htmlFor="date-fim">Data Edição (Final)</Label>
                 <Input
                   id="date-fim"
                   type="date"
@@ -203,7 +233,10 @@ export default function Pedidos() {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setSearchText("");
+                    setSearchPedido("");
+                    setSearchRomaneio("");
+                    setSearchPortador("");
+                    setSearchCliente("");
                     setFilterBase("Todas");
                     setFilterStatus("Todos");
                     setDateInicio("");
@@ -233,12 +266,24 @@ export default function Pedidos() {
               </CardContent>
             </Card>
           ) : (
-            filteredPedidos.map((pedido) => (
-              <Card
-                key={pedido.id}
-                className="cursor-pointer hover:bg-accent/50 transition-colors"
-                onClick={() => navigate(`/pedidos/${pedido.id}/editar`)}
-              >
+            filteredPedidos.map((pedido) => {
+              const getHoverColor = () => {
+                switch (pedido.status) {
+                  case "Em processo de devolução":
+                    return "hover:bg-warning/20";
+                  case "Devolvido":
+                    return "hover:bg-success/20";
+                  default:
+                    return "hover:bg-destructive/20";
+                }
+              };
+
+              return (
+                <Card
+                  key={pedido.id}
+                  className={`cursor-pointer transition-colors ${getHoverColor()}`}
+                  onClick={() => navigate(`/pedidos/${pedido.id}/editar`)}
+                >
                 <CardContent className="py-4">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <div>
@@ -280,7 +325,8 @@ export default function Pedidos() {
                   </div>
                 </CardContent>
               </Card>
-            ))
+              );
+            })
           )}
         </div>
       </div>

@@ -87,8 +87,9 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
     warnings.push('Cliente não informado');
   }
   
+  // Colaborador não é mais obrigatório
   if (!row.colaborador?.trim()) {
-    errors.push('Colaborador é obrigatório');
+    warnings.push('Colaborador não informado');
   }
 
   // Validar base

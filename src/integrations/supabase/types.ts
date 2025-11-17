@@ -41,36 +41,36 @@ export type Database = {
       pedidos_devolucao: {
         Row: {
           base: string
-          cliente_id: string
+          cliente_id: string | null
           colaborador: string
           data_cadastro: string
           id: string
           pedido_codigo: string
-          portador_id: string
+          portador_id: string | null
           romaneio: string
           status: string
           updated_at: string
         }
         Insert: {
           base: string
-          cliente_id: string
+          cliente_id?: string | null
           colaborador: string
           data_cadastro?: string
           id?: string
           pedido_codigo: string
-          portador_id: string
+          portador_id?: string | null
           romaneio: string
           status?: string
           updated_at?: string
         }
         Update: {
           base?: string
-          cliente_id?: string
+          cliente_id?: string | null
           colaborador?: string
           data_cadastro?: string
           id?: string
           pedido_codigo?: string
-          portador_id?: string
+          portador_id?: string | null
           romaneio?: string
           status?: string
           updated_at?: string

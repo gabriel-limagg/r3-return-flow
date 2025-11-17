@@ -84,10 +84,7 @@ export default function ImportarPedidos() {
           portador_id = portador?.id;
 
           if (!portador_id && row.portador.trim()) {
-            validation.errors.push(`Portador "${row.portador}" não encontrado`);
-            if (!validation.warnings.includes('Portador não informado')) {
-              validation.isValid = false;
-            }
+            validation.warnings.push(`Portador "${row.portador}" não encontrado - será cadastrado sem portador`);
           }
         }
 
@@ -110,10 +107,7 @@ export default function ImportarPedidos() {
           cliente_id = cliente?.id;
 
           if (!cliente_id && row.cliente.trim()) {
-            validation.errors.push(`Cliente "${row.cliente}" não encontrado`);
-            if (!validation.warnings.includes('Cliente não informado')) {
-              validation.isValid = false;
-            }
+            validation.warnings.push(`Cliente "${row.cliente}" não encontrado - será cadastrado sem cliente`);
           }
         }
 
@@ -164,9 +158,9 @@ export default function ImportarPedidos() {
         return {
           pedido_codigo: row.pedido_codigo.trim(),
           romaneio: row.romaneio?.trim() || '',
-          portador_id: row.portador_id!,
-          cliente_id: row.cliente_id!,
-          colaborador: row.colaborador.trim(),
+          portador_id: row.portador_id || null,
+          cliente_id: row.cliente_id || null,
+          colaborador: row.colaborador?.trim() || '',
           base: row.base.toUpperCase(),
           status: row.status,
           data_cadastro: dataCadastro,

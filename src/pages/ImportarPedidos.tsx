@@ -145,14 +145,23 @@ export default function ImportarPedidos() {
       const batch = validRows.slice(i, i + batchSize);
 
       const insertData = batch.map((row) => {
-        // Converter data brasileira para ISO
-        let dataCadastro = new Date().toISOString();
+        // Converter data brasileira para ISO - usar SEMPRE a data do CSV
+        let dataCadastro: string;
+        
         if (row.data_cadastro?.trim()) {
-          const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2}):(\d{2})/);
+          const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
           if (brDateMatch) {
             const [, day, month, year, hour, minute] = brDateMatch;
-            dataCadastro = new Date(`${year}-${month}-${day}T${hour}:${minute}:00`).toISOString();
+            const hourStr = hour || '00';
+            const minuteStr = minute || '00';
+            dataCadastro = new Date(`${year}-${month}-${day}T${hourStr}:${minuteStr}:00`).toISOString();
+          } else {
+            // Se tem data mas não conseguiu parsear, lançar erro
+            throw new Error(`Data inválida na linha ${row.lineNumber}: ${row.data_cadastro}`);
           }
+        } else {
+          // Se não tem data no CSV, usar data atual
+          dataCadastro = new Date().toISOString();
         }
 
         return {

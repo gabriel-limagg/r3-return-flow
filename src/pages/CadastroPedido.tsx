@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ComboboxSearchable, ComboboxOption } from "@/components/ComboboxSearchable";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
+import logoPrincipal from "@/assets/logo-principal.png";
 
 export default function CadastroPedido() {
   const navigate = useNavigate();
@@ -127,18 +128,20 @@ export default function CadastroPedido() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/pedidos")}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar para pedidos
-        </Button>
+        <div className="flex items-center gap-3 mb-6">
+          <img src={logoPrincipal} alt="R3 Express Logo" className="h-10" />
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/pedidos")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para pedidos
+          </Button>
+        </div>
 
-        <Card>
+        <Card className="shadow-lg bg-gradient-card">
           <CardHeader>
             <CardTitle>Cadastrar Novo Pedido de Devolução</CardTitle>
             <CardDescription>Preencha os dados abaixo para cadastrar um novo pedido</CardDescription>

@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Plus, Search, Filter } from "lucide-react";
 import { format } from "date-fns";
+import logoPrincipal from "@/assets/logo-principal.png";
 
 interface Pedido {
   id: string;
@@ -108,13 +109,16 @@ export default function Pedidos() {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5">
       {/* Header */}
-      <div className="bg-card border-b">
+      <div className="bg-gradient-card border-b shadow-lg">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">R3 Devoluções</h1>
+          <div className="flex items-center gap-3">
+            <img src={logoPrincipal} alt="R3 Express Logo" className="h-10" />
+            <h1 className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">R3 Devoluções</h1>
+          </div>
           <div className="flex gap-2">
-            <Button onClick={() => navigate("/cadastro")} className="gap-2">
+            <Button onClick={() => navigate("/cadastro")} className="gap-2 shadow-lg">
               <Plus className="h-4 w-4" />
               Novo Pedido
             </Button>
@@ -128,7 +132,7 @@ export default function Pedidos() {
 
       <div className="container mx-auto px-4 py-8">
         {/* Filtros */}
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-lg bg-gradient-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
@@ -274,18 +278,18 @@ export default function Pedidos() {
               const getHoverColor = () => {
                 switch (pedido.status) {
                   case "Em processo de devolução":
-                    return "hover:bg-warning/20 hover:border-warning/40 hover:shadow-sm";
+                    return "hover:bg-gradient-to-r hover:from-warning/10 hover:to-warning/20 hover:border-warning/50 hover:shadow-lg";
                   case "Devolvido":
-                    return "hover:bg-success/20 hover:border-success/40 hover:shadow-sm";
+                    return "hover:bg-gradient-to-r hover:from-success/10 hover:to-success/20 hover:border-success/50 hover:shadow-lg";
                   default:
-                    return "hover:bg-destructive/20 hover:border-destructive/40 hover:shadow-sm";
+                    return "hover:bg-gradient-to-r hover:from-destructive/10 hover:to-destructive/20 hover:border-destructive/50 hover:shadow-lg";
                 }
               };
 
               return (
                 <Card
                   key={pedido.id}
-                  className={`cursor-pointer transition-colors ${getHoverColor()}`}
+                  className={`cursor-pointer transition-all duration-200 shadow-md ${getHoverColor()}`}
                   onClick={() => navigate(`/pedidos/${pedido.id}/editar`)}
                 >
                 <CardContent className="py-4">

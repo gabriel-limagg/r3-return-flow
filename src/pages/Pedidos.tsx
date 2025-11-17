@@ -88,15 +88,20 @@ export default function Pedidos() {
 
     // Filtro de data
     let matchesDate = true;
-    const cadastroDateStr = pedido.data_cadastro?.slice(0, 10); // YYYY-MM-DD
-    const updatedDateStr = pedido.updated_at?.slice(0, 10); // YYYY-MM-DD
+    const cadastroDateStr = pedido.data_cadastro?.slice(0, 10) ?? ""; // YYYY-MM-DD
+    const updatedDateStr = pedido.updated_at?.slice(0, 10) ?? ""; // YYYY-MM-DD
 
-    if (dateInicio) {
-      matchesDate = (cadastroDateStr ?? "") >= dateInicio;
-    }
-
-    if (dateFim && matchesDate) {
-      matchesDate = (updatedDateStr ?? "") <= dateFim;
+    // Se apenas a data inicial estiver definida, filtra exatamente por esse dia de cadastro
+    if (dateInicio && !dateFim) {
+      matchesDate = cadastroDateStr === dateInicio;
+    } else {
+      // Caso contrário, usa intervalo: cadastro >= início e edição <= fim
+      if (dateInicio) {
+        matchesDate = cadastroDateStr >= dateInicio;
+      }
+      if (dateFim && matchesDate) {
+        matchesDate = updatedDateStr <= dateFim;
+      }
     }
 
     return matchesPedido && matchesRomaneio && matchesPortador && matchesCliente && matchesBase && matchesStatus && matchesDate;
@@ -269,11 +274,11 @@ export default function Pedidos() {
               const getHoverColor = () => {
                 switch (pedido.status) {
                   case "Em processo de devolução":
-                    return "hover:bg-warning/20";
+                    return "hover:bg-warning/20 hover:border-warning/40 hover:shadow-sm";
                   case "Devolvido":
-                    return "hover:bg-success/20";
+                    return "hover:bg-success/20 hover:border-success/40 hover:shadow-sm";
                   default:
-                    return "hover:bg-destructive/20";
+                    return "hover:bg-destructive/20 hover:border-destructive/40 hover:shadow-sm";
                 }
               };
 

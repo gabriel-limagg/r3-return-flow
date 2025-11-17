@@ -88,18 +88,15 @@ export default function Pedidos() {
 
     // Filtro de data
     let matchesDate = true;
+    const cadastroDateStr = pedido.data_cadastro?.slice(0, 10); // YYYY-MM-DD
+    const updatedDateStr = pedido.updated_at?.slice(0, 10); // YYYY-MM-DD
+
     if (dateInicio) {
-      const cadastroDate = new Date(pedido.data_cadastro);
-      const inicioDate = new Date(dateInicio);
-      inicioDate.setHours(0, 0, 0, 0);
-      cadastroDate.setHours(0, 0, 0, 0);
-      matchesDate = cadastroDate >= inicioDate;
+      matchesDate = (cadastroDateStr ?? "") >= dateInicio;
     }
+
     if (dateFim && matchesDate) {
-      const editDate = new Date(pedido.updated_at);
-      const fimDate = new Date(dateFim);
-      fimDate.setHours(23, 59, 59, 999);
-      matchesDate = editDate <= fimDate;
+      matchesDate = (updatedDateStr ?? "") <= dateFim;
     }
 
     return matchesPedido && matchesRomaneio && matchesPortador && matchesCliente && matchesBase && matchesStatus && matchesDate;

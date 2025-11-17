@@ -10,6 +10,7 @@ import { ComboboxSearchable, ComboboxOption } from "@/components/ComboboxSearcha
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
 import { format } from "date-fns";
+import logoPrincipal from "@/assets/logo-principal.png";
 
 export default function EditarPedido() {
   const { id } = useParams();
@@ -157,25 +158,27 @@ export default function EditarPedido() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 flex items-center justify-center">
         <p>Carregando...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5 p-4 md:p-8">
       <div className="max-w-3xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => navigate("/pedidos")}
-          className="mb-6"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar para pedidos
-        </Button>
+        <div className="flex items-center gap-3 mb-6">
+          <img src={logoPrincipal} alt="R3 Express Logo" className="h-10" />
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/pedidos")}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar para pedidos
+          </Button>
+        </div>
 
-        <Card>
+        <Card className="shadow-lg bg-gradient-card">
           <CardHeader>
             <CardTitle>Editar Pedido de Devolução</CardTitle>
             <CardDescription>Atualize os dados do pedido abaixo</CardDescription>

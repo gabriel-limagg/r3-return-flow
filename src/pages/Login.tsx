@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Package } from "lucide-react";
+import logoPrincipal from "@/assets/logo-principal.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -100,15 +100,13 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/5 p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/10 via-background to-primary/5 p-4">
+      <Card className="w-full max-w-md shadow-xl bg-gradient-card">
         <CardHeader className="space-y-1 text-center">
           <div className="flex justify-center mb-4">
-            <div className="p-3 bg-primary rounded-xl">
-              <Package className="h-8 w-8 text-primary-foreground" />
-            </div>
+            <img src={logoPrincipal} alt="R3 Express Logo" className="h-20" />
           </div>
-          <CardTitle className="text-2xl font-bold">R3 Devoluções</CardTitle>
+          <CardTitle className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">R3 Devoluções</CardTitle>
           <CardDescription>Sistema de gerenciamento de devoluções</CardDescription>
         </CardHeader>
         <CardContent>

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge } from "@/components/StatusBadge";
 import { useToast } from "@/hooks/use-toast";
-import { LogOut, Plus, Search, Filter } from "lucide-react";
+import { LogOut, Plus, Search, Filter, Upload } from "lucide-react";
 import { format } from "date-fns";
 import logoPrincipal from "@/assets/logo-principal.png";
 
@@ -121,6 +121,10 @@ export default function Pedidos() {
             <Button onClick={() => navigate("/cadastro")} className="gap-2 shadow-lg">
               <Plus className="h-4 w-4" />
               Novo Pedido
+            </Button>
+            <Button onClick={() => navigate("/importar")} variant="outline" className="gap-2 shadow-lg">
+              <Upload className="h-4 w-4" />
+              Importar Pedidos
             </Button>
             <Button variant="outline" onClick={handleLogout} className="gap-2">
               <LogOut className="h-4 w-4" />

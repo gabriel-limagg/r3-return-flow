@@ -91,6 +91,8 @@ export default function Pedidos() {
     if (dateInicio) {
       const cadastroDate = new Date(pedido.data_cadastro);
       const inicioDate = new Date(dateInicio);
+      inicioDate.setHours(0, 0, 0, 0);
+      cadastroDate.setHours(0, 0, 0, 0);
       matchesDate = cadastroDate >= inicioDate;
     }
     if (dateFim && matchesDate) {

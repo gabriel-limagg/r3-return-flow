@@ -55,7 +55,8 @@ export default function Pedidos() {
         portadores(nome, codigo),
         clientes(nome)
       `)
-      .order("data_cadastro", { ascending: false });
+      .order("data_cadastro", { ascending: false })
+      .limit(10000);
 
     if (error) {
       toast({

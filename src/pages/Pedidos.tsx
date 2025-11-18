@@ -56,7 +56,7 @@ export default function Pedidos() {
         clientes(nome)
       `)
       .order("data_cadastro", { ascending: false })
-      .limit(10000);
+      .limit(50000);
 
     if (error) {
       toast({

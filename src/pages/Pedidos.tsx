@@ -108,6 +108,12 @@ export default function Pedidos() {
     return matchesPedido && matchesRomaneio && matchesPortador && matchesCliente && matchesBase && matchesStatus && matchesDate;
   });
 
+  // Contadores de status baseados nos pedidos filtrados
+  const totalGeral = filteredPedidos.length;
+  const totalADevolver = filteredPedidos.filter(p => p.status === "A Devolver").length;
+  const totalEmProcesso = filteredPedidos.filter(p => p.status === "Em processo de devolução").length;
+  const totalDevolvido = filteredPedidos.filter(p => p.status === "Devolvido").length;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/10 via-background to-primary/5">
       {/* Header */}
@@ -262,6 +268,45 @@ export default function Pedidos() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Contadores de Status */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <Card className="shadow-lg bg-gradient-card border-2 border-primary/20">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground mb-1">Geral</p>
+                <p className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">{totalGeral}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg bg-gradient-card border-2 border-destructive/20">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground mb-1">A Devolver</p>
+                <p className="text-3xl font-bold text-destructive">{totalADevolver}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg bg-gradient-card border-2 border-warning/20">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground mb-1">Em Processo</p>
+                <p className="text-3xl font-bold text-warning">{totalEmProcesso}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-lg bg-gradient-card border-2 border-success/20">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <p className="text-sm font-medium text-muted-foreground mb-1">Devolvido</p>
+                <p className="text-3xl font-bold text-success">{totalDevolvido}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Lista de Pedidos */}
         <div className="space-y-4">

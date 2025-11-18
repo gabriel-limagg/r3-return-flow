@@ -151,10 +151,18 @@ export default function ImportarPedidos() {
         if (row.data_cadastro?.trim()) {
           const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
           if (brDateMatch) {
-            const [, day, month, year, hour, minute] = brDateMatch;
-            const hourStr = hour || '00';
-            const minuteStr = minute || '00';
-            dataCadastro = new Date(`${year}-${month}-${day}T${hourStr}:${minuteStr}:00`).toISOString();
+            const day = brDateMatch[1];
+            const month = brDateMatch[2];
+            const year = brDateMatch[3];
+            const hour = brDateMatch[4] ?? '00';
+            const minute = brDateMatch[5] ?? '00';
+            const dateStr = `${year}-${month}-${day}T${hour}:${minute}:00`;
+            const parsedDate = new Date(dateStr);
+
+            if (isNaN(parsedDate.getTime())) {
+              throw new Error(`Data inválida na linha ${row.lineNumber}: ${row.data_cadastro}`);
+            }
+            dataCadastro = parsedDate.toISOString();
           } else {
             // Se tem data mas não conseguiu parsear, lançar erro
             throw new Error(`Data inválida na linha ${row.lineNumber}: ${row.data_cadastro}`);

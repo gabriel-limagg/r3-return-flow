@@ -65,6 +65,7 @@ export default function Pedidos() {
         variant: "destructive",
       });
     } else {
+      console.log(`Total de pedidos carregados: ${data?.length || 0}`);
       setPedidos(data as Pedido[]);
     }
     setLoading(false);

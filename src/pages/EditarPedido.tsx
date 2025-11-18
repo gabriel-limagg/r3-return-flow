@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ComboboxSearchable, ComboboxOption } from "@/components/ComboboxSearchable";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
@@ -30,6 +31,16 @@ export default function EditarPedido() {
 
   const [portadores, setPortadores] = useState<ComboboxOption[]>([]);
   const [clientes, setClientes] = useState<ComboboxOption[]>([]);
+
+  // Estados para diálogos de novo portador/cliente
+  const [showPortadorDialog, setShowPortadorDialog] = useState(false);
+  const [showClienteDialog, setShowClienteDialog] = useState(false);
+  const [newPortadorCodigo, setNewPortadorCodigo] = useState("");
+  const [newPortadorNome, setNewPortadorNome] = useState("");
+  const [newClienteCodigo, setNewClienteCodigo] = useState("");
+  const [newClienteNome, setNewClienteNome] = useState("");
+  const [addingPortador, setAddingPortador] = useState(false);
+  const [addingCliente, setAddingCliente] = useState(false);
 
   useEffect(() => {
     loadPortadores();
@@ -110,6 +121,89 @@ export default function EditarPedido() {
       label: c.nome,
     }));
     setClientes(options);
+  };
+
+  const handleAddPortador = async () => {
+    if (!newPortadorCodigo || !newPortadorNome) {
+      toast({
+        title: "Erro",
+        description: "Preencha código e nome do portador.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAddingPortador(true);
+    const { data, error } = await supabase
+      .from("portadores")
+      .insert({
+        codigo: newPortadorCodigo,
+        nome: newPortadorNome,
+        base: base,
+        ativo: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Erro ao adicionar portador",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Sucesso!",
+        description: "Portador adicionado com sucesso.",
+      });
+      setNewPortadorCodigo("");
+      setNewPortadorNome("");
+      setShowPortadorDialog(false);
+      await loadPortadores();
+      setPortadorId(data.id);
+    }
+    setAddingPortador(false);
+  };
+
+  const handleAddCliente = async () => {
+    if (!newClienteNome) {
+      toast({
+        title: "Erro",
+        description: "Preencha o nome do cliente.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAddingCliente(true);
+    const { data, error } = await supabase
+      .from("clientes")
+      .insert({
+        codigo: newClienteCodigo || null,
+        nome: newClienteNome,
+        ativo: true,
+      })
+      .select()
+      .single();
+
+    if (error) {
+      toast({
+        title: "Erro ao adicionar cliente",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Sucesso!",
+        description: "Cliente adicionado com sucesso.",
+      });
+      setNewClienteCodigo("");
+      setNewClienteNome("");
+      setShowClienteDialog(false);
+      await loadClientes();
+      setClienteId(data.id);
+    }
+    setAddingCliente(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -219,6 +313,8 @@ export default function EditarPedido() {
                     placeholder="Selecione o portador"
                     searchPlaceholder="Buscar portador..."
                     emptyText="Nenhum portador encontrado."
+                    onAddNew={() => setShowPortadorDialog(true)}
+                    addNewLabel="+ Adicionar novo portador"
                   />
                 </div>
 
@@ -231,6 +327,8 @@ export default function EditarPedido() {
                     placeholder="Selecione o cliente"
                     searchPlaceholder="Buscar cliente..."
                     emptyText="Nenhum cliente encontrado."
+                    onAddNew={() => setShowClienteDialog(true)}
+                    addNewLabel="+ Adicionar novo cliente"
                   />
                 </div>
 
@@ -304,6 +402,90 @@ export default function EditarPedido() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialog para adicionar novo portador */}
+      <Dialog open={showPortadorDialog} onOpenChange={setShowPortadorDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Novo Portador</DialogTitle>
+            <DialogDescription>
+              Preencha as informações do novo portador
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-portador-codigo">Código *</Label>
+              <Input
+                id="new-portador-codigo"
+                value={newPortadorCodigo}
+                onChange={(e) => setNewPortadorCodigo(e.target.value)}
+                placeholder="Digite o código"
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-portador-nome">Nome *</Label>
+              <Input
+                id="new-portador-nome"
+                value={newPortadorNome}
+                onChange={(e) => setNewPortadorNome(e.target.value)}
+                placeholder="Digite o nome"
+                className="h-11"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPortadorDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAddPortador} disabled={addingPortador}>
+              {addingPortador ? "Adicionando..." : "Adicionar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog para adicionar novo cliente */}
+      <Dialog open={showClienteDialog} onOpenChange={setShowClienteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionar Novo Cliente</DialogTitle>
+            <DialogDescription>
+              Preencha as informações do novo cliente
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="new-cliente-codigo">Código (opcional)</Label>
+              <Input
+                id="new-cliente-codigo"
+                value={newClienteCodigo}
+                onChange={(e) => setNewClienteCodigo(e.target.value)}
+                placeholder="Digite o código"
+                className="h-11"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-cliente-nome">Nome *</Label>
+              <Input
+                id="new-cliente-nome"
+                value={newClienteNome}
+                onChange={(e) => setNewClienteNome(e.target.value)}
+                placeholder="Digite o nome"
+                className="h-11"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowClienteDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleAddCliente} disabled={addingCliente}>
+              {addingCliente ? "Adicionando..." : "Adicionar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

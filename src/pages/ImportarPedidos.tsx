@@ -325,6 +325,7 @@ export default function ImportarPedidos() {
                       <th className="p-2 text-left font-medium">Pedido</th>
                       <th className="p-2 text-left font-medium">Romaneio</th>
                       <th className="p-2 text-left font-medium">Status</th>
+                      <th className="p-2 text-left font-medium">Data</th>
                       <th className="p-2 text-left font-medium">Validação</th>
                     </tr>
                   </thead>
@@ -334,6 +335,8 @@ export default function ImportarPedidos() {
                         <td className="p-2">{row.lineNumber}</td>
                         <td className="p-2">{row.pedido_codigo}</td>
                         <td className="p-2">{row.romaneio}</td>
+                        <td className="p-2">{row.status}</td>
+                        <td className="p-2 text-xs">{row.data_cadastro || '-'}</td>
                         <td className="p-2">
                           <Badge
                             variant={row.validation.isValid ? 'default' : 'destructive'}

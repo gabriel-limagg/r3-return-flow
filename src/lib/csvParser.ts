@@ -108,19 +108,20 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
 
   // Validar data (se fornecida) - aceitar formato brasileiro
   if (row.data_cadastro?.trim()) {
-    // Tentar parsear formato brasileiro: dd/MM/yyyy HH:mm
-    const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})\s*(\d{2}:\d{2})?/);
+    const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
     if (brDateMatch) {
-      const [, day, month, year] = brDateMatch;
-      const date = new Date(`${year}-${month}-${day}`);
+      const day = parseInt(brDateMatch[1]);
+      const month = parseInt(brDateMatch[2]);
+      const year = parseInt(brDateMatch[3]);
+      const hour = brDateMatch[4] ? parseInt(brDateMatch[4]) : 0;
+      const minute = brDateMatch[5] ? parseInt(brDateMatch[5]) : 0;
+      
+      const date = new Date(Date.UTC(year, month - 1, day, hour, minute, 0));
       if (isNaN(date.getTime())) {
         errors.push('Data de cadastro em formato inválido');
       }
     } else {
-      const date = new Date(row.data_cadastro);
-      if (isNaN(date.getTime())) {
-        errors.push('Data de cadastro em formato inválido');
-      }
+      errors.push('Data de cadastro em formato inválido (use dd/MM/yyyy HH:mm)');
     }
   }
 

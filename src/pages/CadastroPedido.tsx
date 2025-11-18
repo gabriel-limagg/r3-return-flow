@@ -199,14 +199,17 @@ export default function CadastroPedido() {
 
                 <div className="space-y-2">
                   <Label htmlFor="colaborador">Colaborador *</Label>
-                  <Input
-                    id="colaborador"
-                    value={colaborador}
-                    onChange={(e) => setColaborador(e.target.value)}
-                    placeholder="Nome do colaborador"
-                    required
-                    className="h-11"
-                  />
+                  <Select value={colaborador} onValueChange={setColaborador}>
+                    <SelectTrigger className="h-11">
+                      <SelectValue placeholder="Selecione o colaborador" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ARIELY">ARIELY</SelectItem>
+                      <SelectItem value="AUGUSTO">AUGUSTO</SelectItem>
+                      <SelectItem value="DAYANE">DAYANE</SelectItem>
+                      <SelectItem value="LARISSA">LARISSA</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">

@@ -67,47 +67,22 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // Campos obrigatórios
+  // CAMPOS OBRIGATÓRIOS: apenas pedido, status e data
   if (!row.pedido_codigo?.trim()) {
     errors.push('Código do pedido é obrigatório');
   }
-  
-  // Romaneio não é mais obrigatório (pode estar vazio no CSV)
-  if (!row.romaneio?.trim()) {
-    warnings.push('Romaneio não informado');
-  }
-  
-  // Portador não é mais obrigatório (pode estar vazio no CSV)
-  if (!row.portador?.trim()) {
-    warnings.push('Portador não informado');
-  }
-  
-  // Cliente não é mais obrigatório (pode estar vazio no CSV)
-  if (!row.cliente?.trim()) {
-    warnings.push('Cliente não informado');
-  }
-  
-  // Colaborador não é mais obrigatório
-  if (!row.colaborador?.trim()) {
-    warnings.push('Colaborador não informado');
-  }
 
-  // Validar base
-  if (!row.base?.trim()) {
-    errors.push('Base é obrigatória');
-  } else if (!VALID_BASES.includes(row.base.toUpperCase())) {
-    errors.push(`Base inválida. Use: ${VALID_BASES.join(', ')}`);
-  }
-
-  // Validar status
+  // Validar status (obrigatório)
   if (!row.status?.trim()) {
     errors.push('Status é obrigatório');
   } else if (!VALID_STATUS.includes(row.status)) {
     errors.push(`Status inválido. Use: ${VALID_STATUS.join(', ')}`);
   }
 
-  // Validar data (se fornecida) - aceitar formato brasileiro
-  if (row.data_cadastro?.trim()) {
+  // Validar data (obrigatória)
+  if (!row.data_cadastro?.trim()) {
+    errors.push('Data de cadastro é obrigatória');
+  } else {
     const brDateMatch = row.data_cadastro.match(/^(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}):(\d{2}))?/);
     if (brDateMatch) {
       const day = parseInt(brDateMatch[1]);
@@ -123,6 +98,29 @@ export const validateRow = (row: CSVRow, lineNumber: number): ValidationResult =
     } else {
       errors.push('Data de cadastro em formato inválido (use dd/MM/yyyy HH:mm)');
     }
+  }
+  
+  // CAMPOS OPCIONAIS - apenas avisos
+  if (!row.romaneio?.trim()) {
+    warnings.push('Romaneio não informado');
+  }
+  
+  if (!row.portador?.trim()) {
+    warnings.push('Portador não informado');
+  }
+  
+  if (!row.cliente?.trim()) {
+    warnings.push('Cliente não informado');
+  }
+  
+  if (!row.colaborador?.trim()) {
+    warnings.push('Colaborador não informado');
+  }
+
+  if (!row.base?.trim()) {
+    warnings.push('Base não informada');
+  } else if (!VALID_BASES.includes(row.base.toUpperCase())) {
+    warnings.push(`Base inválida. Use: ${VALID_BASES.join(', ')}`);
   }
 
   return {

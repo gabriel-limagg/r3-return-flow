@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +27,8 @@ interface ComboboxSearchableProps {
   placeholder?: string;
   emptyText?: string;
   searchPlaceholder?: string;
+  onAddNew?: () => void;
+  addNewLabel?: string;
 }
 
 export function ComboboxSearchable({
@@ -36,6 +38,8 @@ export function ComboboxSearchable({
   placeholder = "Selecione...",
   emptyText = "Nenhum resultado encontrado.",
   searchPlaceholder = "Buscar...",
+  onAddNew,
+  addNewLabel = "+ Adicionar novo",
 }: ComboboxSearchableProps) {
   const [open, setOpen] = React.useState(false);
   const [searchValue, setSearchValue] = React.useState("");
@@ -73,6 +77,19 @@ export function ComboboxSearchable({
           />
           <CommandEmpty>{emptyText}</CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto">
+            {onAddNew && (
+              <CommandItem
+                onSelect={() => {
+                  onAddNew();
+                  setOpen(false);
+                  setSearchValue("");
+                }}
+                className="text-primary font-medium"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                {addNewLabel}
+              </CommandItem>
+            )}
             {filteredOptions.map((option) => (
               <CommandItem
                 key={option.value}

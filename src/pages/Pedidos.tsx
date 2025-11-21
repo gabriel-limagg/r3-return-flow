@@ -48,26 +48,44 @@ export default function Pedidos() {
 
   const loadPedidos = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("pedidos_devolucao")
-      .select(`
-        *,
-        portadores(nome, codigo),
-        clientes(nome)
-      `)
-      .order("data_cadastro", { ascending: false })
-      .limit(50000);
+    
+    // Buscar todos os pedidos sem limite
+    let allPedidos: Pedido[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let hasMore = true;
 
-    if (error) {
-      toast({
-        title: "Erro ao carregar pedidos",
-        description: error.message,
-        variant: "destructive",
-      });
-    } else {
-      console.log(`Total de pedidos carregados: ${data?.length || 0}`);
-      setPedidos(data as Pedido[]);
+    while (hasMore) {
+      const { data, error } = await supabase
+        .from("pedidos_devolucao")
+        .select(`
+          *,
+          portadores(nome, codigo),
+          clientes(nome)
+        `)
+        .order("data_cadastro", { ascending: false })
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        toast({
+          title: "Erro ao carregar pedidos",
+          description: error.message,
+          variant: "destructive",
+        });
+        break;
+      }
+
+      if (data && data.length > 0) {
+        allPedidos = [...allPedidos, ...data];
+        from += batchSize;
+        hasMore = data.length === batchSize;
+      } else {
+        hasMore = false;
+      }
     }
+
+    console.log(`Total de pedidos carregados: ${allPedidos.length}`);
+    setPedidos(allPedidos as Pedido[]);
     setLoading(false);
   };
 

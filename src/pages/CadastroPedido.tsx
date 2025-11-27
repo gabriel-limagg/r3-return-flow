@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { ComboboxSearchable, ComboboxOption } from "@/components/ComboboxSearchable";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft } from "lucide-react";
@@ -24,6 +25,7 @@ export default function CadastroPedido() {
   const [colaborador, setColaborador] = useState("");
   const [base, setBase] = useState("SP");
   const [status, setStatus] = useState("A Devolver");
+  const [observacao, setObservacao] = useState("");
 
   const [portadores, setPortadores] = useState<ComboboxOption[]>([]);
   const [clientes, setClientes] = useState<ComboboxOption[]>([]);
@@ -176,24 +178,15 @@ export default function CadastroPedido() {
     e.preventDefault();
     setLoading(true);
 
-    if (!pedidoCodigo || !romaneio || !portadorId || !clienteId || !colaborador) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
     const { error } = await supabase.from("pedidos_devolucao").insert({
       pedido_codigo: pedidoCodigo,
       romaneio,
-      portador_id: portadorId,
-      cliente_id: clienteId,
+      portador_id: portadorId || null,
+      cliente_id: clienteId || null,
       colaborador,
       base,
       status,
+      observacao: observacao || null,
     });
 
     if (error) {
@@ -216,6 +209,7 @@ export default function CadastroPedido() {
       setColaborador("");
       setBase("SP");
       setStatus("A Devolver");
+      setObservacao("");
     }
 
     setLoading(false);
@@ -244,31 +238,29 @@ export default function CadastroPedido() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="pedido-codigo">Pedido (Código) *</Label>
+                  <Label htmlFor="pedido-codigo">Pedido (Código)</Label>
                   <Input
                     id="pedido-codigo"
                     value={pedidoCodigo}
                     onChange={(e) => setPedidoCodigo(e.target.value)}
                     placeholder="Digite o código do pedido"
-                    required
                     className="h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="romaneio">Romaneio *</Label>
+                  <Label htmlFor="romaneio">Romaneio</Label>
                   <Input
                     id="romaneio"
                     value={romaneio}
                     onChange={(e) => setRomaneio(e.target.value)}
                     placeholder="Digite o romaneio"
-                    required
                     className="h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Portador *</Label>
+                  <Label>Portador</Label>
                   <ComboboxSearchable
                     options={portadores}
                     value={portadorId}
@@ -282,7 +274,7 @@ export default function CadastroPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Cliente *</Label>
+                  <Label>Cliente</Label>
                   <ComboboxSearchable
                     options={clientes}
                     value={clienteId}
@@ -296,7 +288,7 @@ export default function CadastroPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="colaborador">Colaborador *</Label>
+                  <Label htmlFor="colaborador">Colaborador</Label>
                   <Select value={colaborador} onValueChange={setColaborador}>
                     <SelectTrigger className="h-11">
                       <SelectValue placeholder="Selecione o colaborador" />
@@ -311,7 +303,7 @@ export default function CadastroPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="base">Base *</Label>
+                  <Label htmlFor="base">Base</Label>
                   <Select value={base} onValueChange={setBase}>
                     <SelectTrigger className="h-11">
                       <SelectValue />
@@ -324,8 +316,8 @@ export default function CadastroPedido() {
                   </Select>
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
-                  <Label htmlFor="status">Status *</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
                   <Select value={status} onValueChange={setStatus}>
                     <SelectTrigger className="h-11">
                       <SelectValue />
@@ -336,6 +328,17 @@ export default function CadastroPedido() {
                       <SelectItem value="Devolvido">Devolvido</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="observacao">Observação</Label>
+                  <Textarea
+                    id="observacao"
+                    value={observacao}
+                    onChange={(e) => setObservacao(e.target.value)}
+                    placeholder="Digite observações sobre o pedido (opcional)"
+                    className="min-h-[100px]"
+                  />
                 </div>
               </div>
 

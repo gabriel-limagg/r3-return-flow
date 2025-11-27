@@ -45,6 +45,7 @@ export type Database = {
           colaborador: string
           data_cadastro: string
           id: string
+          observacao: string | null
           pedido_codigo: string
           portador_id: string | null
           romaneio: string
@@ -57,6 +58,7 @@ export type Database = {
           colaborador: string
           data_cadastro?: string
           id?: string
+          observacao?: string | null
           pedido_codigo: string
           portador_id?: string | null
           romaneio: string
@@ -69,6 +71,7 @@ export type Database = {
           colaborador?: string
           data_cadastro?: string
           id?: string
+          observacao?: string | null
           pedido_codigo?: string
           portador_id?: string | null
           romaneio?: string

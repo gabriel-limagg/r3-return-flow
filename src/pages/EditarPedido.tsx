@@ -7,9 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { ComboboxSearchable, ComboboxOption } from "@/components/ComboboxSearchable";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import logoPrincipal from "@/assets/logo-principal.png";
 
@@ -28,6 +30,7 @@ export default function EditarPedido() {
   const [base, setBase] = useState("SP");
   const [status, setStatus] = useState("A Devolver");
   const [dataCadastro, setDataCadastro] = useState("");
+  const [observacao, setObservacao] = useState("");
 
   const [portadores, setPortadores] = useState<ComboboxOption[]>([]);
   const [clientes, setClientes] = useState<ComboboxOption[]>([]);
@@ -35,12 +38,14 @@ export default function EditarPedido() {
   // Estados para diálogos de novo portador/cliente
   const [showPortadorDialog, setShowPortadorDialog] = useState(false);
   const [showClienteDialog, setShowClienteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [newPortadorCodigo, setNewPortadorCodigo] = useState("");
   const [newPortadorNome, setNewPortadorNome] = useState("");
   const [newClienteCodigo, setNewClienteCodigo] = useState("");
   const [newClienteNome, setNewClienteNome] = useState("");
   const [addingPortador, setAddingPortador] = useState(false);
   const [addingCliente, setAddingCliente] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadPortadores();
@@ -68,12 +73,13 @@ export default function EditarPedido() {
 
     setPedidoCodigo(data.pedido_codigo);
     setRomaneio(data.romaneio);
-    setPortadorId(data.portador_id);
-    setClienteId(data.cliente_id);
+    setPortadorId(data.portador_id || "");
+    setClienteId(data.cliente_id || "");
     setColaborador(data.colaborador);
     setBase(data.base);
     setStatus(data.status);
     setDataCadastro(data.data_cadastro);
+    setObservacao(data.observacao || "");
     setLoadingData(false);
   };
 
@@ -210,26 +216,17 @@ export default function EditarPedido() {
     e.preventDefault();
     setLoading(true);
 
-    if (!pedidoCodigo || !romaneio || !portadorId || !clienteId || !colaborador) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
-        variant: "destructive",
-      });
-      setLoading(false);
-      return;
-    }
-
     const { error } = await supabase
       .from("pedidos_devolucao")
       .update({
         pedido_codigo: pedidoCodigo,
         romaneio,
-        portador_id: portadorId,
-        cliente_id: clienteId,
+        portador_id: portadorId || null,
+        cliente_id: clienteId || null,
         colaborador,
         base,
         status,
+        observacao: observacao || null,
       })
       .eq("id", id);
 
@@ -248,6 +245,29 @@ export default function EditarPedido() {
     }
 
     setLoading(false);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    const { error } = await supabase
+      .from("pedidos_devolucao")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      toast({
+        title: "Erro ao excluir pedido",
+        description: error.message,
+        variant: "destructive",
+      });
+      setDeleting(false);
+    } else {
+      toast({
+        title: "Sucesso!",
+        description: "Pedido excluído com sucesso.",
+      });
+      navigate("/pedidos");
+    }
   };
 
   if (loadingData) {
@@ -281,31 +301,29 @@ export default function EditarPedido() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="pedido-codigo">Pedido (Código) *</Label>
+                  <Label htmlFor="pedido-codigo">Pedido (Código)</Label>
                   <Input
                     id="pedido-codigo"
                     value={pedidoCodigo}
                     onChange={(e) => setPedidoCodigo(e.target.value)}
                     placeholder="Digite o código do pedido"
-                    required
                     className="h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="romaneio">Romaneio *</Label>
+                  <Label htmlFor="romaneio">Romaneio</Label>
                   <Input
                     id="romaneio"
                     value={romaneio}
                     onChange={(e) => setRomaneio(e.target.value)}
                     placeholder="Digite o romaneio"
-                    required
                     className="h-11"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Portador *</Label>
+                  <Label>Portador</Label>
                   <ComboboxSearchable
                     options={portadores}
                     value={portadorId}
@@ -319,7 +337,7 @@ export default function EditarPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label>Cliente *</Label>
+                  <Label>Cliente</Label>
                   <ComboboxSearchable
                     options={clientes}
                     value={clienteId}
@@ -333,7 +351,7 @@ export default function EditarPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="colaborador">Colaborador *</Label>
+                  <Label htmlFor="colaborador">Colaborador</Label>
                   <Select value={colaborador} onValueChange={setColaborador}>
                     <SelectTrigger className="h-11">
                       <SelectValue placeholder="Selecione o colaborador" />
@@ -348,7 +366,7 @@ export default function EditarPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="base">Base *</Label>
+                  <Label htmlFor="base">Base</Label>
                   <Select value={base} onValueChange={setBase}>
                     <SelectTrigger className="h-11">
                       <SelectValue />
@@ -362,7 +380,7 @@ export default function EditarPedido() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status *</Label>
+                  <Label htmlFor="status">Status</Label>
                   <Select value={status} onValueChange={setStatus}>
                     <SelectTrigger className="h-11">
                       <SelectValue />
@@ -383,6 +401,17 @@ export default function EditarPedido() {
                     className="h-11 bg-muted"
                   />
                 </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="observacao">Observação</Label>
+                  <Textarea
+                    id="observacao"
+                    value={observacao}
+                    onChange={(e) => setObservacao(e.target.value)}
+                    placeholder="Digite observações sobre o pedido (opcional)"
+                    className="min-h-[100px]"
+                  />
+                </div>
               </div>
 
               <div className="flex gap-4">
@@ -396,6 +425,16 @@ export default function EditarPedido() {
                   className="flex-1 h-11"
                 >
                   Cancelar
+                </Button>
+                <Button
+                  type="button"
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                  className="h-11"
+                  disabled={deleting}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Excluir
                 </Button>
               </div>
             </form>
@@ -486,6 +525,28 @@ export default function EditarPedido() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de confirmação de exclusão */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este pedido? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Excluindo..." : "Excluir"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

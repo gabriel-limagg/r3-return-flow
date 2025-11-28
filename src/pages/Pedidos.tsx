@@ -359,7 +359,7 @@ export default function Pedidos() {
                 <Card
                   key={pedido.id}
                   className={`cursor-pointer transition-all duration-200 shadow-md ${getHoverColor()}`}
-                  onClick={() => navigate(`/pedidos/${pedido.id}/editar`)}
+                  onDoubleClick={() => navigate(`/pedidos/${pedido.id}/editar`)}
                 >
                 <CardContent className="py-4">
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

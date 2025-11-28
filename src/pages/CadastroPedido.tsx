@@ -254,6 +254,11 @@ export default function CadastroPedido() {
                     id="romaneio"
                     value={romaneio}
                     onChange={(e) => setRomaneio(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                      }
+                    }}
                     placeholder="Digite o romaneio"
                     className="h-11"
                   />

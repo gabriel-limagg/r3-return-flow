@@ -44,6 +44,19 @@ export default function Pedidos() {
 
   useEffect(() => {
     loadPedidos();
+    // Restaurar filtros do sessionStorage
+    const savedFilters = sessionStorage.getItem('pedidos_filters');
+    if (savedFilters) {
+      const filters = JSON.parse(savedFilters);
+      setSearchPedido(filters.searchPedido || "");
+      setSearchRomaneio(filters.searchRomaneio || "");
+      setSearchPortador(filters.searchPortador || "");
+      setSearchCliente(filters.searchCliente || "");
+      setFilterBase(filters.filterBase || "Todas");
+      setFilterStatus(filters.filterStatus || "Todos");
+      setDateInicio(filters.dateInicio || "");
+      setDateFim(filters.dateFim || "");
+    }
   }, []);
 
   const loadPedidos = async () => {
@@ -93,6 +106,21 @@ export default function Pedidos() {
     await signOut();
     navigate("/login");
   };
+
+  // Salvar filtros no sessionStorage sempre que mudarem
+  useEffect(() => {
+    const filters = {
+      searchPedido,
+      searchRomaneio,
+      searchPortador,
+      searchCliente,
+      filterBase,
+      filterStatus,
+      dateInicio,
+      dateFim,
+    };
+    sessionStorage.setItem('pedidos_filters', JSON.stringify(filters));
+  }, [searchPedido, searchRomaneio, searchPortador, searchCliente, filterBase, filterStatus, dateInicio, dateFim]);
 
   const filteredPedidos = pedidos.filter((pedido) => {
     // Filtros de busca separados

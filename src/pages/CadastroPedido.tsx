@@ -235,8 +235,8 @@ export default function CadastroPedido() {
             <CardDescription>Preencha os dados abaixo para cadastrar um novo pedido</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid gap-6 md:grid-cols-2">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-4">
                 <div className="space-y-2">
                   <Label htmlFor="pedido-codigo">Pedido (Código)</Label>
                   <Input
@@ -335,14 +335,14 @@ export default function CadastroPedido() {
                   </Select>
                 </div>
 
-                <div className="space-y-2 md:col-span-2">
+                <div className="space-y-2 md:col-span-3 lg:col-span-4">
                   <Label htmlFor="observacao">Observação</Label>
                   <Textarea
                     id="observacao"
                     value={observacao}
                     onChange={(e) => setObservacao(e.target.value)}
                     placeholder="Digite observações sobre o pedido (opcional)"
-                    className="min-h-[100px]"
+                    className="min-h-[80px]"
                   />
                 </div>
               </div>
